@@ -1,0 +1,79 @@
+---
+name: "Gitea Auto-PR"
+description: Create a new PR on Gitea.
+inputs:
+  url:
+    description: URL to the Gitea instance
+    required: true
+  token:
+    description: Personal access token to the Gitea instance
+    required: true
+  tea-version:
+    description: Tea CLI version
+    required: true
+    default: 0.9.2
+  pr-label:
+    description: Issues label for the PR
+  assignee:
+    description: User to assign the PR to
+
+
+runs:
+  using: composite
+  steps:
+    - name: Check the OS of the runner
+      if: ${{ runner.os != 'Linux' }}
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::Support Linux Only"
+        exit 1
+    - name: Check architecture of the runner
+      if: ${{ runner.arch != 'x64' }}
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::Support x64 Architecture Only"
+        exit 1
+
+    - name: Get the commit message
+      id: commit
+      shell: bash
+      run: |
+        echo "GIT_MSG=$(git log -n 1 --format=%B)" >> "$GITHUB_OUTPUT"
+    - name: Install Tea
+      env:
+        TEA_DL_URL: "https://dl.gitea.com/tea/${{ inputs.tea-version }}\
+          /tea-${{ inputs.tea-version }}-linux-amd64"
+      shell: bash
+      run: |
+        TEA_DIR=$(mktemp -d -t tmp.XXXX)
+        pushd $TEA_DIR
+        wget "$TEA_DL_URL"
+        wget "${TEA_DL_URL}.sha256"
+        if $(sha256sum --quiet -c "tea-${{ inputs.tea-version }}-linux-amd64.sha256"); then
+          mv "tea-${{ inputs.tea-version }}-linux-amd64" /usr/bin/tea
+          chmod +x /usr/bin/tea
+          popd
+          rm -rf $TEA_DIR
+        else
+          popd
+          rm -rf $TEA_DIR
+          echo "::error title=⛔ error hint::Tea v${{ inputs.tea-version }} Checksum Failed"
+          exit 1
+        fi
+    - name: Login to Gitea
+      shell: bash
+      env:
+        GIT_SERVER_URL: ${{ inputs.url }}
+        GIT_SERVER_TOKEN: ${{ inputs.token }}
+      run: >-
+        tea login add
+        -u "$GIT_SERVER_URL"
+        -t "$GIT_SERVER_TOKEN"
+    - name: Create pull request
+      env:
+        GIT_MSG: ${{ steps.commit.outputs.GIT_MSG }}
+      shell: bash
+      run: >-
+        tea pr create -a "${{ inputs.assignee }}"
+        -L "${{ inputs.pr-label }}"
+        -t "$GIT_MSG"
