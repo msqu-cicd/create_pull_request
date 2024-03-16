@@ -69,7 +69,17 @@ runs:
         tea login add
         -u "$GIT_SERVER_URL"
         -t "$GIT_SERVER_TOKEN"
+    - name: Check for existing pull request
+      id: no-pr
+      continue-on-error: true
+      shell: bash
+      run: >-
+        tea pr -f head -o simple |
+        grep -q ${{ github.ref_name }} &&
+        exit 1 ||
+        exit 0
     - name: Create pull request
+      if: steps.no-pr.outcome == 'success'
       env:
         GIT_MSG: ${{ steps.commit.outputs.GIT_MSG }}
       shell: bash
@@ -77,3 +87,9 @@ runs:
         tea pr create -a "${{ inputs.assignee }}"
         -L "${{ inputs.pr-label }}"
         -t "$GIT_MSG"
+    - name: Skip pull request
+      if: steps.no-pr.outcome == 'failure'
+      shell: bash
+      run: >
+          echo "::error title=⛔ error hint::
+          A PR already exists for this branch: ${{ github.ref_name }}"
