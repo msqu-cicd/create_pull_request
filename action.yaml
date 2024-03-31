@@ -38,7 +38,16 @@ runs:
       id: commit
       shell: bash
       run: |
-        echo "GIT_MSG=$(git log -n 1 --format=%B)" >> "$GITHUB_OUTPUT"
+        {
+          echo "COMMIT_MSG<<EOF"
+          git log -n 1 --format=%s
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+        {
+          echo "COMMIT_DESC<<EOF"
+          git log -n 1 --format=%b
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
     - name: Install Tea
       env:
         TEA_DL_URL: "https://dl.gitea.com/tea/${{ inputs.tea-version }}\
@@ -81,12 +90,14 @@ runs:
     - name: Create pull request
       if: steps.no-pr.outcome == 'success'
       env:
-        GIT_MSG: ${{ steps.commit.outputs.GIT_MSG }}
+        COMMIT_MSG: ${{ steps.commit.outputs.COMMIT_MSG }}
+        COMMIT_DESC: ${{ steps.commit.outputs.COMMIT_DESC }}
       shell: bash
       run: >-
         tea pr create -a "${{ inputs.assignee }}"
         -L "${{ inputs.pr-label }}"
-        -t "$GIT_MSG"
+        -t "$COMMIT_MSG"
+        -d "$COMMIT_DESC"
     - name: Skip pull request
       if: steps.no-pr.outcome == 'failure'
       shell: bash
