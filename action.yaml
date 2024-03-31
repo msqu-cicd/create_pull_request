@@ -17,6 +17,9 @@ inputs:
   assignee:
     description: User to assign the PR to
 
+branding:
+  icon: git-pull-request
+  color: green
 
 runs:
   using: composite
