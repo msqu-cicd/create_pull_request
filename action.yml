@@ -7,12 +7,11 @@ inputs:
     description: 'Base branch to create PR against'
     required: true
     default: 'main'
+  token:
+    description: 'PAT for creating PR'
+    required: true
 
 runs:
-  # using: 'docker'
-  # image: 'Dockerfile'
-  # args:
-  #   - ${{ inputs.base }}
   using: "composite"
   steps:
     - name: "Pre-setup"
@@ -32,7 +31,7 @@ runs:
           curl -X 'POST' \
           'https://git.araj.me/api/v1/repos/maxking/dns-utils/pulls' \
           -H 'accept: application/json' \
-          -H 'Authorization: token ${{ secrets.FORGEJO_PAT }}' \
+          -H 'Authorization: token ${{ inputs.token }}' \
           -H 'Content-Type: application/json' \
           -d '{
           "assignee": "maxking",
