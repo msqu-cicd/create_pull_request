@@ -50,7 +50,7 @@ runs:
       run: |
         if [[ -n "$(git status --porcelain)" ]]; then
           git add ${{ inputs.add-paths }}
-          git commit -m ${{ inputs.commit-message }}
+          git commit -m "${{ inputs.commit-message }}"
           git push --force-with-lease origin automated-pr-change
           curl -X 'POST' \
           'https://git.araj.me/api/v1/repos/maxking/dns-utils/pulls' \
