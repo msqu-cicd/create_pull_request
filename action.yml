@@ -36,7 +36,7 @@ runs:
   using: "composite"
   steps:
     - run: |
-        git config --global user.name "Forgejo Bot"
+        git config --global user.name "Forgejo Bot" >> $GITHUB_OUTPUT
         git config --global user.email "forgejo@users.noreply.git.araj.me"
       shell: bash
       name: "Configure git"
@@ -48,7 +48,7 @@ runs:
     - name: "Commit and create PR"
       shell: bash
       run: |
-        if [[ -n "$(${{ inputs.pr-condition-cmd }})" ]]; then
+        if [[ -n "$(git status --porcelain)" ]]; then
           git add ${{ inputs.add-paths }}
           git commit -m ${{ inputs.commit-message }}
           git push --force-with-lease origin automated-pr-change
@@ -67,3 +67,6 @@ runs:
         else
           echo "No changes to commit"
         fi
+branding:
+  icon: 'check'
+  color: 'blue'
