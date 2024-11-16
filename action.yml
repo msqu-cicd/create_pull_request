@@ -1,0 +1,11 @@
+---
+name: "Create PR"
+description: 'Commit and create PR'
+inputs:
+  base:
+    description: 'Base branch to create PR against'
+    required: true
+    default: 'main'
+runs:
+  using: 'node16'
+  main: 'index.js'
