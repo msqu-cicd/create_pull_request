@@ -44,3 +44,6 @@ jobs:
 | `pr-title` | PR title | No | `Automated PR` |
 | `pr-body` | PR body | No | `Automated PR` |
 | `pr-condition-cmd` | Command to check if PR should be created | No | `git status --porcelain` |
+| `pr-branch` | Branch to create PR against | No | `automated-pr` |
+| `commit-user` | Commit user | No | `Forgejo Bot` |
+| `commit-email` | Commit email | No | `forgejo@users.noreply.git` |

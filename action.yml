@@ -21,7 +21,7 @@ inputs:
   pr-branch:
     description: 'Branch to create PR from'
     required: false
-    default: '${{ inputs.pr-branch }}'
+    default: 'automated-pr'
   pr-title:
     description: 'PR title'
     required: false
@@ -41,7 +41,7 @@ inputs:
   commit-email:
     description: 'Email to use for commit'
     required: false
-    default: 'forgejo@users.noreply.git.araj.me'
+    default: 'forgejo@users.noreply.git'
 
 
 
