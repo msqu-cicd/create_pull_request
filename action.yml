@@ -18,6 +18,10 @@ inputs:
     description: 'Commit message'
     required: false
     default: 'Automated commit'
+  pr-branch:
+    description: 'Branch to create PR from'
+    required: false
+    default: '${{ inputs.pr-branch }}'
   pr-title:
     description: 'PR title'
     required: false
@@ -30,20 +34,29 @@ inputs:
     description: 'Command to check if PR should be created'
     required: false
     default: git status --porcelain
+  commit-user:
+    description: 'Username to use for commit'
+    required: false
+    default: 'Forgejo Bot'
+  commit-email:
+    description: 'Email to use for commit'
+    required: false
+    default: 'forgejo@users.noreply.git.araj.me'
+
 
 
 runs:
   using: "composite"
   steps:
     - run: |
-        git config --global user.name "Forgejo Bot" >> $GITHUB_OUTPUT
-        git config --global user.email "forgejo@users.noreply.git.araj.me"
+        git config --global user.name "${{ inputs.commit-user }}" >> $GITHUB_OUTPUT
+        git config --global user.email "${{ inputs.commit-email }}" >> $GITHUB_OUTPUT
       shell: bash
       name: "Configure git"
     - name: "Pre-setup"
       run: |
         git fetch --all
-        git checkout -b automated-pr-change
+        git checkout -b "${{ inputs.pr-branch }}"
       shell: bash
     - name: "Commit and create PR"
       shell: bash
@@ -51,7 +64,7 @@ runs:
         if [[ -n "$(git status --porcelain)" ]]; then
           git add ${{ inputs.add-paths }}
           git commit -m "${{ inputs.commit-message }}"
-          git push --force-with-lease origin automated-pr-change
+          git push --force-with-lease origin "${{ inputs.pr-branch }}"
           curl -X 'POST' \
           'https://git.araj.me/api/v1/repos/maxking/dns-utils/pulls' \
           -H 'accept: application/json' \
@@ -61,7 +74,7 @@ runs:
           "assignee": "maxking",
           "base": "${{ inputs.base }}",
           "body": "${{ inputs.pr-body }}",
-          "head": "automated-pr-change",
+          "head": "${{ inputs.pr-branch }}",
           "title": "${{ inputs.pr-title }}"
           }'
         else
