@@ -8,6 +8,7 @@ Automatically create pull requests with customizable titles, bodies, and labels.
 Add the following workflow to your repository:
 
 
+```yaml
 name: Create Pull Request
 on:
   push:
@@ -31,7 +32,7 @@ jobs:
           pr-title: 'feat: new automated changes'
           pr-body: 'This PR contains automated changes'
           pr-condition-cmd: 'git status --porcelain'
-
+```
 ## Inputs
 
 | Input | Description | Required | Default |
