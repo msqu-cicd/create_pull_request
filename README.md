@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Create Pull Request
-        uses: your-username/create-pr-action@v1
+        uses: https://git.araj.me/maxking/create-pr@v1
         with:
           # required
           token: ${{ secrets.GH_TOKEN }}
