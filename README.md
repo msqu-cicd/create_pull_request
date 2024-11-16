@@ -1,7 +1,13 @@
 
-# Create Pull Request Action
+# Forgejo Create Pull Request Action
 
-Automatically create pull requests with customizable titles, bodies, and labels.
+This is a custom action which glues together the right commands to create
+a pull request from changes in Forgejo Actions. The existing Github Create
+Pull Request action does not work with Forgejo due to incompatibilities in
+the API code.
+
+This repo is mostly a mirror of my local copy in private git repo that I
+wanted to share with others.
 
 ## Usage
 
@@ -21,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Create Pull Request
-        uses: https://git.araj.me/maxking/create-pr@v1
+        uses: https://github.com/maxking/forgejo-create-pr@main
         with:
           # required
           token: ${{ secrets.GH_TOKEN }}
@@ -47,3 +53,7 @@ jobs:
 | `pr-branch` | Branch to create PR against | No | `automated-pr` |
 | `commit-user` | Commit user | No | `Forgejo Bot` |
 | `commit-email` | Commit email | No | `forgejo@users.noreply.git` |
+
+
+## License
+The code in this repo is licensed under Apache 2.0. See the LICENSE file for details.
