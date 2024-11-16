@@ -9,7 +9,35 @@ inputs:
     default: 'main'
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.base }}
+  # using: 'docker'
+  # image: 'Dockerfile'
+  # args:
+  #   - ${{ inputs.base }}
+  using: "composite"
+  steps:
+    - name: "Pre-setup"
+      run: |
+        git fetch --all
+        git checkout -b automated-pr-change
+        git config --global user.name "Forgejo Bot"
+        git config --global user.email "forgejo@users.noreply.git.araj.me"
+      shell: bash
+    - name: "Commit and create PR"
+      shell: bash
+      if: $(git status --porcelain | wc -l) > 0
+      run: |
+        git add proxmox/
+        git commit -m "Add changed host records"
+        git push --force-with-lease origin automated-pr-change
+        curl -X 'POST' \
+        'https://git.araj.me/api/v1/repos/maxking/dns-utils/pulls' \
+        -H 'accept: application/json' \
+        -H 'Authorization: token ${{ secrets.FORGEJO_PAT }}' \
+        -H 'Content-Type: application/json' \
+        -d '{
+        "assignee": "maxking",
+        "base": "main",
+        "body": "Update PR for DNS records",
+        "head": "automated-pr-change",
+        "title": "Automated PR for DNS records"
+        }'

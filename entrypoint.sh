@@ -3,8 +3,10 @@
 set -ex
 git fetch --all
 git checkout -b automated-pr-change
+
 git config --global user.name "Forgejo Bot"
 git config --global user.email "forgejo@users.noreply.git.araj.me"
+
 if [[ -n "$(git status --porcelain)" ]]; then
     git add proxmox/
     git commit -m "Add changed host records"
