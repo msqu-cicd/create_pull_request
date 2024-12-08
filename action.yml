@@ -98,7 +98,7 @@ runs:
         "head": "${{ inputs.pr-branch }}",
         "title": "${{ inputs.pr-title }}"
         }')
-        echo $response | jq .
+        # echo $response | jq .
         pr_number=$(echo $response | jq -r '.number')
         echo "PR Number: $pr_number"
     - name: "Auto merge PR"
