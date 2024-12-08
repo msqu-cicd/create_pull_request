@@ -87,17 +87,17 @@ runs:
         git push --force-with-lease origin "${{ inputs.pr-branch }}"
         echo "URL:  $GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls"
         response=$(curl -X 'POST' \
-        "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls" \
-        -H 'accept: application/json' \
-        -H 'Authorization: token ${{ inputs.token }}' \
-        -H 'Content-Type: application/json' \
-        -d '{
-        "assignee": "${{ inputs.pr-asignee }}",
-        "base": "${{ inputs.base }}",
-        "body": "${{ inputs.pr-body }}",
-        "head": "${{ inputs.pr-branch }}",
-        "title": "${{ inputs.pr-title }}"
-        }')
+          "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls" \
+          -H 'accept: application/json' \
+          -H 'Authorization: token ${{ inputs.token }}' \
+          -H 'Content-Type: application/json' \
+          -d '{
+          "assignee": "${{ inputs.pr-asignee }}",
+          "base": "${{ inputs.base }}",
+          "body": "${{ inputs.pr-body }}",
+          "head": "${{ inputs.pr-branch }}",
+          "title": "${{ inputs.pr-title }}"
+          }')
         # echo $response | jq .
         pr_number=$(echo $response | jq -r '.number')
         echo "PR Number: $pr_number"
@@ -109,16 +109,17 @@ runs:
         PR_NUMBER: ${{ steps.commit.outputs.pr_number }}
       run: |
           echo "Settig auto merge for PR $PR_NUMBER"
+          echo "URL: $GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$PR_NUMBER/merge"
           response=$(curl -X 'POST' \
-          "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$PR_NUMBER/merge" \
-          -H 'accept: application/json' \
-          -H 'Authorization: token ${{ inputs.token }}' \
-          -H 'Content-Type: application/json' \
-          -d '{
-          "Do": "merge",
-          "merge_when_checks_succeed": true,
-          "delete_branch_after_merge": true
-          }')
+            "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$PR_NUMBER/merge" \
+            -H 'accept: application/json' \
+            -H 'Authorization: token ${{ inputs.token }}' \
+            -H 'Content-Type: application/json' \
+            -d '{
+            "Do": "merge",
+            "merge_when_checks_succeed": true,
+            "delete_branch_after_merge": true
+            }')
           echo $response
 branding:
   icon: 'check'
