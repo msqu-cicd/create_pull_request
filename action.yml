@@ -38,7 +38,7 @@ inputs:
     description: 'Default assignee for the Pull rrequest'
     required: false
     default: null
-  pr-automge:
+  pr-automerge:
     description: 'Whether to automatically merge the Pull Request'
     required: false
     default: 'false'
