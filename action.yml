@@ -107,6 +107,7 @@ runs:
       if: steps.git.outputs.changes == 'true' && steps.commit.outputs.pr_number != 'null'
       env:
         PR_NUMBER: ${{ steps.commit.outputs.pr_number }}
+        REPO: ${{ github.repository }}
       run: |
           echo "Settig auto merge for PR $PR_NUMBER"
           echo "URL: $GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$PR_NUMBER/merge"
