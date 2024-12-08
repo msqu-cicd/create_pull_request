@@ -99,7 +99,7 @@ runs:
             -H 'Authorization: token ${{ inputs.token }}' \
             -H 'Content-Type: application/json' \
             -d '{
-            "merge_method": "merge",
+            "Do": "merge",
             "merge_when_checks_succeed": true,
             "delete_branch_after_merge": true
             }')
