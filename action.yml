@@ -89,6 +89,7 @@ runs:
           "title": "${{ inputs.pr-title }}"
           }')
           pr_number=$(echo $response | jq -r '.number')
+          echo "PR Number: $pr_number"
           if [[ "${{ inputs.pr-automerge }}" == "true" ]]; then
             response=$(curl -X 'POST' \
             "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$pr_number/merge" \
