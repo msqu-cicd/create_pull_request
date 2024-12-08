@@ -92,7 +92,7 @@ runs:
           pr_number=$(echo $response | jq -r '.number')
           echo "PR Number: $pr_number"
           if [[ "${{ inputs.pr-automerge }}" == "true" ]]; then
-            echo "Settig auto merge for $pr_number"
+            echo "Settig auto merge for PR $pr_number"
             response=$(curl -X 'POST' \
             "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$pr_number/merge" \
             -H 'accept: application/json' \
@@ -103,6 +103,7 @@ runs:
             "merge_when_checks_succeed": true
             "delete_branch_after_merge": true
             }')
+            echo $response | jq .
           else
             echo "Not setting auto merge for $pr_number because param ${{ inputs.pr-automerge }} is not true"
           fi
