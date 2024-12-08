@@ -74,7 +74,7 @@ runs:
           git commit -m "${{ inputs.commit-message }}"
           git push --force-with-lease origin "${{ inputs.pr-branch }}"
           base_repo=${{ github.event.pull_request.base.repo.full_name }}
-          curl -X 'POST' \
+          response=$(curl -X 'POST' \
           "$GITHUB_SERVER_URL/api/v1/repos/$base_repo/pulls" \
           -H 'accept: application/json' \
           -H 'Authorization: token ${{ inputs.token }}' \
@@ -85,7 +85,7 @@ runs:
           "body": "${{ inputs.pr-body }}",
           "head": "${{ inputs.pr-branch }}",
           "title": "${{ inputs.pr-title }}"
-          }'
+          }')
           pr_number=$(echo $response | jq -r '.event.pull_request.number')
           if [[ "${{ inputs.pr-automerge }}" == "true" ]]; then
             response=$(curl -X 'POST' \
