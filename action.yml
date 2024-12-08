@@ -66,50 +66,57 @@ runs:
         git fetch --all
         git checkout -b "${{ inputs.pr-branch }}"
       shell: bash
+    - name: "Check changes"
+      id: git
+      shell: bash
+      run: |
+        if [[ -n "$(git status --porcelain)" ]]; then
+          echo changes=true >> $GITHUB_OUTPUT
+        else
+          echo changes=false >> $GITHUB_OUTPUT
+        fi
     - name: "Commit and create PR"
+      if: steps.git.outputs.changes == 'true'
+      id: commit
       shell: bash
       env:
         REPO: ${{ github.repository }}
       run: |
-        if [[ -n "$(git status --porcelain)" ]]; then
-          git add ${{ inputs.add-paths }}
-          git commit -m "${{ inputs.commit-message }}"
-          git push --force-with-lease origin "${{ inputs.pr-branch }}"
-          echo "URL:  $GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls"
+        git add ${{ inputs.add-paths }}
+        git commit -m "${{ inputs.commit-message }}"
+        git push --force-with-lease origin "${{ inputs.pr-branch }}"
+        echo "URL:  $GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls"
+        response=$(curl -X 'POST' \
+        "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls" \
+        -H 'accept: application/json' \
+        -H 'Authorization: token ${{ inputs.token }}' \
+        -H 'Content-Type: application/json' \
+        -d '{
+        "assignee": "${{ inputs.pr-asignee }}",
+        "base": "${{ inputs.base }}",
+        "body": "${{ inputs.pr-body }}",
+        "head": "${{ inputs.pr-branch }}",
+        "title": "${{ inputs.pr-title }}"
+        }')
+        echo $response | jq .
+        pr_number=$(echo $response | jq -r '.number')
+        echo "PR Number: $pr_number"
+    - name: "Auto merge PR"
+      shell: bash
+      if: steps.git.outputs.changes == 'true' && steps.commit.outputs.pr_number != 'null'
+      run: |
+          echo "Settig auto merge for PR $pr_number"
           response=$(curl -X 'POST' \
-          "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls" \
+          "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$pr_number/merge" \
           -H 'accept: application/json' \
           -H 'Authorization: token ${{ inputs.token }}' \
           -H 'Content-Type: application/json' \
           -d '{
-          "assignee": "${{ inputs.pr-asignee }}",
-          "base": "${{ inputs.base }}",
-          "body": "${{ inputs.pr-body }}",
-          "head": "${{ inputs.pr-branch }}",
-          "title": "${{ inputs.pr-title }}"
+          "Do": "merge",
+          "merge_when_checks_succeed": true,
+          "delete_branch_after_merge": true
           }')
           echo $response | jq .
-          pr_number=$(echo $response | jq -r '.number')
-          echo "PR Number: $pr_number"
-          if [[ "${{ inputs.pr-automerge }}" == "true" ]]; then
-            echo "Settig auto merge for PR $pr_number"
-            response=$(curl -X 'POST' \
-            "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$pr_number/merge" \
-            -H 'accept: application/json' \
-            -H 'Authorization: token ${{ inputs.token }}' \
-            -H 'Content-Type: application/json' \
-            -d '{
-            "Do": "merge",
-            "merge_when_checks_succeed": true,
-            "delete_branch_after_merge": true
-            }')
-            echo $response | jq .
-          else
-            echo "Not setting auto merge for $pr_number because param ${{ inputs.pr-automerge }} is not true"
-          fi
-        else
-          echo "No changes to commit"
-        fi
 branding:
   icon: 'check'
   color: 'blue'
