@@ -34,6 +34,10 @@ inputs:
     description: 'Command to check if PR should be created'
     required: false
     default: git status --porcelain
+  pr-assignee:
+    description: 'Default assignee for the Pull rrequest'
+    required: false
+    default: null
   commit-user:
     description: 'Username to use for commit'
     required: false
@@ -71,7 +75,7 @@ runs:
           -H 'Authorization: token ${{ inputs.token }}' \
           -H 'Content-Type: application/json' \
           -d '{
-          "assignee": "maxking",
+          "assignee": "${{ inputs.pr-asignee }}",
           "base": "${{ inputs.base }}",
           "body": "${{ inputs.pr-body }}",
           "head": "${{ inputs.pr-branch }}",
