@@ -88,8 +88,7 @@ runs:
           "head": "${{ inputs.pr-branch }}",
           "title": "${{ inputs.pr-title }}"
           }')
-          echo "PR created: $response"
-          pr_number=$(echo $response | jq -r '.pull_request.number')
+          pr_number=$(echo $response | jq -r '.number')
           if [[ "${{ inputs.pr-automerge }}" == "true" ]]; then
             response=$(curl -X 'POST' \
             "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$pr_number/merge" \
