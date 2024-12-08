@@ -86,9 +86,10 @@ runs:
           "head": "${{ inputs.pr-branch }}",
           "title": "${{ inputs.pr-title }}"
           }'
+          pr_number=$(echo $response | jq -r '.event.pull_request.number')
           if [[ "${{ inputs.pr-automerge }}" == "true" ]]; then
-            curl -X 'POST' \
-            "$GITHUB_SERVER_URL/api/v1/repos/$base_repo/pulls/${{ github.event.pull_request.number }}/merge" \
+            response=$(curl -X 'POST' \
+            "$GITHUB_SERVER_URL/api/v1/repos/$base_repo/pulls/$pr_number/merge" \
             -H 'accept: application/json' \
             -H 'Authorization: token ${{ inputs.token }}' \
             -H 'Content-Type: application/json' \
@@ -96,7 +97,7 @@ runs:
             "merge_method": "merge"
             "merge_when_checks_succeed": true
             "delete_branch_after_merge": true
-            }'
+            }')
           fi
         else
           echo "No changes to commit"
