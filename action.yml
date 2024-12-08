@@ -104,11 +104,12 @@ runs:
     - name: "Auto merge PR"
       shell: bash
       if: steps.git.outputs.changes == 'true' && steps.commit.outputs.pr_number != 'null'
+      env:
+        PR_NUMBER: ${{ steps.commit.outputs.pr_number }}
       run: |
-          pr_number=${{ steps.commit.outputs.pr_number }}
-          echo "Settig auto merge for PR $pr_number"
+          echo "Settig auto merge for PR $PR_NUMBER"
           response=$(curl -X 'POST' \
-          "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$pr_number/merge" \
+          "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$PR_NUMBER/merge" \
           -H 'accept: application/json' \
           -H 'Authorization: token ${{ inputs.token }}' \
           -H 'Content-Type: application/json' \
