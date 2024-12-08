@@ -69,8 +69,9 @@ runs:
           git add ${{ inputs.add-paths }}
           git commit -m "${{ inputs.commit-message }}"
           git push --force-with-lease origin "${{ inputs.pr-branch }}"
+          base_repo=${{ github.event.pull_request.base.repo.full_name }}
           curl -X 'POST' \
-          'https://git.araj.me/api/v1/repos/maxking/dns-utils/pulls' \
+          "$GITHUB_SERVER_URL/api/v1/repos/$base_repo/pulls" \
           -H 'accept: application/json' \
           -H 'Authorization: token ${{ inputs.token }}' \
           -H 'Content-Type: application/json' \
