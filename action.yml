@@ -105,6 +105,7 @@ runs:
       shell: bash
       if: steps.git.outputs.changes == 'true' && steps.commit.outputs.pr_number != 'null'
       run: |
+          pr_number=${{ steps.commit.outputs.pr_number }}
           echo "Settig auto merge for PR $pr_number"
           response=$(curl -X 'POST' \
           "$GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls/$pr_number/merge" \
