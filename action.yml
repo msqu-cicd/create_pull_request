@@ -69,7 +69,7 @@ runs:
     - name: "Commit and create PR"
       shell: bash
       env:
-        REPO: ${{ github.action_repository }}
+        REPO: ${{ github.repository }}
       run: |
         if [[ -n "$(git status --porcelain)" ]]; then
           git add ${{ inputs.add-paths }}
