@@ -31,10 +31,12 @@ runs:
         echo "::error title=⛔ error hint::Support Linux Only"
         exit 1
 
-    - name: Get architecture of the runner
+    - name: Check architecture of the runner
+      if: ${{ runner.arch != 'x64' }}
       shell: bash
-      id: system_arch
-      run: dpkg --print-architecture
+      run: |
+        echo "::error title=⛔ error hint::Support x64 Architecture Only"
+        exit 1
 
     - name: Get the commit message
       id: commit
@@ -54,13 +56,13 @@ runs:
     - name: Install Tea
       env:
         TEA_DL_URL: "https://dl.gitea.com/tea/${{ inputs.tea-version }}\
-          /tea-${{ inputs.tea-version }}-linux-${{ steps.system_arch.outputs }}"
+          /tea-${{ inputs.tea-version }}-linux-amd64"
       shell: bash
       run: |
         TEA_DIR=$(mktemp -d -t tmp.XXXX)
         pushd $TEA_DIR
-        wget -q "$TEA_DL_URL"
-        wget -q "${TEA_DL_URL}.sha256"
+        wget "$TEA_DL_URL"
+        wget "${TEA_DL_URL}.sha256"
         if $(sha256sum --quiet -c "tea-${{ inputs.tea-version }}-linux-amd64.sha256"); then
           mv "tea-${{ inputs.tea-version }}-linux-amd64" /usr/bin/tea
           chmod +x /usr/bin/tea
