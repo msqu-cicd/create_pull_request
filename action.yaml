@@ -30,12 +30,11 @@ runs:
       run: |
         echo "::error title=⛔ error hint::Support Linux Only"
         exit 1
-    - name: Check architecture of the runner
-      if: ${{ runner.arch != 'x64' }}
+
+    - name: Get architecture of the runner
       shell: bash
-      run: |
-        echo "::error title=⛔ error hint::Support x64 Architecture Only"
-        exit 1
+      id: system_arch
+      run: $(dpkg --print-architecture)
 
     - name: Get the commit message
       id: commit
@@ -51,16 +50,17 @@ runs:
           git log -n 1 --format=%b
           echo EOF
         } >> "$GITHUB_OUTPUT"
+
     - name: Install Tea
       env:
         TEA_DL_URL: "https://dl.gitea.com/tea/${{ inputs.tea-version }}\
-          /tea-${{ inputs.tea-version }}-linux-amd64"
+          /tea-${{ inputs.tea-version }}-linux-${{ steps.system_arch.outputs }}"
       shell: bash
       run: |
         TEA_DIR=$(mktemp -d -t tmp.XXXX)
         pushd $TEA_DIR
-        wget "$TEA_DL_URL"
-        wget "${TEA_DL_URL}.sha256"
+        wget -q "$TEA_DL_URL"
+        wget -q "${TEA_DL_URL}.sha256"
         if $(sha256sum --quiet -c "tea-${{ inputs.tea-version }}-linux-amd64.sha256"); then
           mv "tea-${{ inputs.tea-version }}-linux-amd64" /usr/bin/tea
           chmod +x /usr/bin/tea
@@ -72,6 +72,7 @@ runs:
           echo "::error title=⛔ error hint::Tea v${{ inputs.tea-version }} Checksum Failed"
           exit 1
         fi
+
     - name: Login to Gitea
       shell: bash
       env:
@@ -81,6 +82,7 @@ runs:
         tea login add
         -u "$GIT_SERVER_URL"
         -t "$GIT_SERVER_TOKEN"
+
     - name: Check for existing pull request
       id: no-pr
       continue-on-error: true
@@ -90,6 +92,7 @@ runs:
         grep -q ${{ github.ref_name }} &&
         exit 1 ||
         exit 0
+
     - name: Create pull request
       if: steps.no-pr.outcome == 'success'
       env:
@@ -101,6 +104,7 @@ runs:
         -L "${{ inputs.pr-label }}"
         -t "$COMMIT_MSG"
         -d "$COMMIT_DESC"
+
     - name: Skip pull request
       if: steps.no-pr.outcome == 'failure'
       shell: bash
