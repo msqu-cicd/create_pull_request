@@ -34,7 +34,7 @@ runs:
     - name: Get architecture of the runner
       shell: bash
       id: system_arch
-      run: $(dpkg --print-architecture)
+      run: dpkg --print-architecture
 
     - name: Get the commit message
       id: commit
