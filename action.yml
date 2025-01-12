@@ -14,6 +14,10 @@ inputs:
     description: 'Paths to add to commit'
     required: false
     default: '.'
+  add-patterns:
+    description: 'Patterns to add to commit'
+    required: false
+    default: '*'
   commit-message:
     description: 'Commit message'
     required: false
@@ -49,7 +53,7 @@ inputs:
   commit-email:
     description: 'Email to use for commit'
     required: false
-    default: 'forgejo@users.noreply.git'
+    default: 'github@0815mail.de'
 
 
 
@@ -82,7 +86,7 @@ runs:
       env:
         REPO: ${{ github.repository }}
       run: |
-        git add ${{ inputs.add-paths }}
+        git add ${{ inputs.add-paths }} ${{ inputs.add-patterns }}
         git commit -m "${{ inputs.commit-message }}"
         git push --force-with-lease origin "${{ inputs.pr-branch }}"
         echo "URL:  $GITHUB_SERVER_URL/api/v1/repos/$REPO/pulls"
